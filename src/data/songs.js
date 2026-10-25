@@ -1,0 +1,87 @@
+export const songCollections = {
+  loved: {
+    title: "Songs you love",
+    subtitle: "Your favourites, all in one place.",
+    songs: [
+      {
+        id: "21",
+        title: "21",
+        artist: "Gracie Abrams",
+        album: "Good Riddance",
+        audio: "/audio/21.mp3",
+        note: "A little piece of your world.",
+        color: "#d9d5f8",
+      },
+      {
+        id: "mess-it-up",
+        title: "Mess It Up",
+        artist: "Gracie Abrams",
+        album: "Good Riddance",
+        audio: "/audio/mess-it-up.mp3",
+        note: "One of your favourites, saved right here.",
+        color: "#c9dafa",
+      },
+      {
+        id: "cigarette-smoke",
+        title: "Cigarette Smoke",
+        artist: "Olivia",
+        album: "Cigarette Smoke",
+        audio: "/audio/cigarette-smoke.mp3",
+        note: "A little song that makes me think of you.",
+        color: "#d9cfee",
+      },
+      {
+        id: "no-other-heart",
+        title: "No Other Heart",
+        artist: "Mac DeMarco",
+        album: "Another One",
+        audio: "/audio/no-other-heart.mp3",
+        note: "Some songs just feel like you.",
+        color: "#d4e6df",
+      },
+    ],
+  },
+
+    remindsMe: {
+    title: "Songs that remind me of you",
+    subtitle: "The ones I hear and instantly think of you.",
+    songs: [
+      {
+        id: "butterflies",
+        title: "Butterflies",
+        artist: "Artist",
+        album: "Album",
+        audio: "/audio/butterflies.mp3",
+        note: "A little song that feels like you.",
+        color: "#d9d5f8",
+      },
+      {
+        id: "hostage",
+        title: "Hostage",
+        artist: "Artist",
+        album: "Album",
+        audio: "/audio/hostage.mp3",
+        note: "Some songs just stay with me.",
+        color: "#c9dafa",
+      },
+      {
+        id: "soft-spot",
+        title: "Soft Spot",
+        artist: "Artist",
+        album: "Album",
+        audio: "/audio/soft-spot.mp3",
+        note: "You're my soft spot.",
+        color: "#d9cfee",
+      },
+      {
+        id: "distance",
+        title: "Distance",
+        artist: "Artist",
+        album: "Album",
+        audio: "/audio/distance.mp3",
+        note: "Even far away, it's always you.",
+        color: "#d4e6df",
+      },
+    ],
+  },};
+  
