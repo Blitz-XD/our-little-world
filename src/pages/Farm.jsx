@@ -54,6 +54,35 @@ const ANIMALS = [
 
 const FINALE = "I'd build you a whole farm if I could. Happy anniversary ♡";
 
+const TOOLS = [
+  { id: "pet", icon: "✋", label: "Pet" },
+  { id: "carrot", icon: "🥕", label: "Carrot" },
+  { id: "corn", icon: "🌽", label: "Corn" },
+  { id: "hay", icon: "🌾", label: "Hay" },
+  { id: "bread", icon: "🍞", label: "Bread" },
+];
+
+// ✏️ Each animal's favourite food (a favourite fills 3 hearts, anything else fills 1)
+const FAVOURITES = {
+  sheep: "hay",
+  cow: "hay",
+  pig: "corn",
+  chicken: "corn",
+  bunny: "carrot",
+  duck: "bread",
+};
+
+const MODES = ["auto", "day", "dusk", "night"];
+const PHASE_LABEL = { day: "Day", dusk: "Sunset", night: "Night" };
+const PHASE_ICON = { day: "☀️", dusk: "🌇", night: "🌙" };
+
+// ✏️ Auto mode follows the hour on HER device
+function phaseForHour(h) {
+  if (h >= 8 && h < 17) return "day";
+  if ((h >= 17 && h < 20) || (h >= 6 && h < 8)) return "dusk";
+  return "night";
+}
+
 /* ---------- little helpers ---------- */
 
 const rand = (min, max) => min + Math.random() * (max - min);
@@ -238,6 +267,16 @@ export default function Farm() {
   const [draft, setDraft] = useState("");
   const [openNote, setOpenNote] = useState(null);
 
+  const [tool, setTool] = useState("pet");
+  const [mode, setMode] = useState("auto");
+  const [hour, setHour] = useState(() => new Date().getHours());
+
+  const phase = mode === "auto" ? phaseForHour(hour) : mode;
+  const activeTool = TOOLS.find((t) => t.id === tool);
+
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+
   const lastPet = useRef({});
   const frozen = useRef({});
   const uid = useRef(0);
@@ -263,14 +302,23 @@ export default function Farm() {
     }
   }, [names, love, read]);
 
-  // Let the animals wander
+  // Keep "auto" time of day fresh
+  useEffect(() => {
+    const id = setInterval(() => setHour(new Date().getHours()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Let the animals wander (they sleep at night)
   useEffect(() => {
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (!calm) {
       ANIMALS.forEach((a) => {
         const step = () => {
-          if (Date.now() > (frozen.current[a.id] || 0)) {
+          if (
+            Date.now() > (frozen.current[a.id] || 0) &&
+            phaseRef.current !== "night"
+          ) {
             setPos((p) => ({ ...p, [a.id]: randomPos(a) }));
             setWalking((w) => ({ ...w, [a.id]: true }));
             later(() => setWalking((w) => ({ ...w, [a.id]: false })), WALK_MS);
@@ -297,18 +345,28 @@ export default function Farm() {
     lastPet.current[a.id] = now;
     frozen.current[a.id] = now + 2600;
 
+    const feeding = tool !== "pet";
+    const loved = feeding && tool === FAVOURITES[a.id];
+
     setLove((l) => ({
       ...l,
-      [a.id]: Math.min(MAX_LOVE, (l[a.id] || 0) + 1),
+      [a.id]: Math.min(MAX_LOVE, (l[a.id] || 0) + (loved ? 3 : 1)),
     }));
     setSquish((s) => ({ ...s, [a.id]: (s[a.id] || 0) + 1 }));
 
+    const glyphs = feeding
+      ? loved
+        ? [activeTool.icon, "♥", "♥", activeTool.icon]
+        : [activeTool.icon, "♥"]
+      : ["♥", "♥"];
+
     const base = ++uid.current * 10;
-    const batch = [0, 1].map((k) => ({
+    const batch = glyphs.map((glyph, k) => ({
       id: base + k,
       animal: a.id,
       dx: rand(-26, 26),
       delay: k * 140,
+      glyph,
     }));
 
     setHearts((h) => [...h, ...batch]);
@@ -318,10 +376,17 @@ export default function Farm() {
       1500
     );
 
-    setBubble({
-      animal: a.id,
-      text: a.sounds[Math.floor(Math.random() * a.sounds.length)],
-    });
+    let text;
+
+    if (feeding) {
+      text = loved ? "yum! ♥" : "mm, thanks~";
+    } else if (phaseRef.current === "night") {
+      text = Math.random() < 0.5 ? "zzz…" : "mmm~";
+    } else {
+      text = a.sounds[Math.floor(Math.random() * a.sounds.length)];
+    }
+
+    setBubble({ animal: a.id, text });
     clearTimeout(bubbleTimer.current);
     bubbleTimer.current = setTimeout(() => setBubble(null), 1300);
   }
@@ -359,8 +424,10 @@ export default function Farm() {
         </h1>
       </header>
 
-      <section className="farm-field">
+      <section className="farm-field" data-phase={phase}>
         <div className="farm-sun" />
+        <div className="farm-moon" />
+        <div className="farm-stars" />
         <span className="farm-cloud c1" />
         <span className="farm-cloud c2" />
 
@@ -390,6 +457,7 @@ export default function Farm() {
 
         <div className="farm-fence" />
         <div className="farm-pond" />
+        <div className="farm-tint" />
 
         {ANIMALS.map((a, i) => {
           const Art = ART[a.id];
@@ -438,18 +506,22 @@ export default function Farm() {
                       animationDelay: `${h.delay}ms`,
                     }}
                   >
-                    ♥
+                    {h.glyph || "♥"}
                   </span>
                 ))}
+
+              <span className="animal-zzz" aria-hidden="true">
+                z z z
+              </span>
 
               <div
                 className="animal-hit"
                 role="button"
                 tabIndex={0}
-                aria-label={`Pet ${name}`}
+                aria-label={`${tool === "pet" ? "Pet" : "Feed"} ${name}`}
                 onPointerDown={() => pet(a)}
                 onPointerMove={(event) => {
-                  if (event.buttons > 0) pet(a);
+                  if (event.buttons > 0 && tool === "pet") pet(a);
                 }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -502,15 +574,62 @@ export default function Farm() {
             </div>
           );
         })}
+
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <span
+            key={i}
+            className="firefly"
+            style={{
+              left: `${((i * 37 + 11) % 84) + 8}%`,
+              top: `${((i * 53 + 30) % 34) + 50}%`,
+              "--d": `${(i * 0.7).toFixed(1)}s`,
+            }}
+          />
+        ))}
       </section>
+
+      <div className="farm-tools" role="group" aria-label="Pet or feed the animals">
+        {TOOLS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`farm-tool ${tool === t.id ? "active" : ""}`}
+            onClick={() => setTool(t.id)}
+            aria-pressed={tool === t.id}
+            aria-label={t.label}
+          >
+            <span>{t.icon}</span>
+            <small>{t.label}</small>
+          </button>
+        ))}
+
+        <span className="farm-tools-gap" />
+
+        <button
+          type="button"
+          className="farm-tool"
+          onClick={() =>
+            setMode((m) => MODES[(MODES.indexOf(m) + 1) % MODES.length])
+          }
+          aria-label="Change time of day"
+        >
+          <span>{PHASE_ICON[phase]}</span>
+          <small>
+            {mode === "auto"
+              ? `Auto · ${PHASE_LABEL[phase]}`
+              : PHASE_LABEL[mode]}
+          </small>
+        </button>
+      </div>
 
       <div className="farm-stats">
         Notes found <b>{found}</b> of {ANIMALS.length}
       </div>
 
       <p className="farm-hint">
-        tap or stroke the animals · tap a name to rename · fill their hearts
-        for a surprise
+        {tool === "pet"
+          ? "tap or stroke the animals · tap a name to rename · fill their hearts for a surprise"
+          : `feeding ${activeTool.label.toLowerCase()}: tap an animal to feed it · each one has a favourite!`}
       </p>
 
       <p className={`farm-message ${allFound ? "show" : ""}`}>{FINALE}</p>

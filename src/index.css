@@ -2101,3 +2101,244 @@ h2 {
     transition-duration: .01ms !important;
   }
 }
+/* ========================================
+   FARM: FEEDING TOOLS + DAY AND NIGHT
+======================================== */
+
+@keyframes firefly-float {
+  0%, 100% { transform: translate(0, 0); }
+  33%      { transform: translate(14px, -12px); }
+  66%      { transform: translate(-10px, -5px); }
+}
+
+@keyframes firefly-glow {
+  0%, 100% { opacity: .25; }
+  50%      { opacity: 1; }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: .5; }
+  50%      { opacity: 1; }
+}
+
+@keyframes zzz-rise {
+  0%   { opacity: 0; transform: translateY(6px) scale(.8); }
+  25%  { opacity: .9; }
+  100% { opacity: 0; transform: translateY(-20px) scale(1.1); }
+}
+
+/* ----- tools bar ----- */
+
+.farm-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.farm-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid rgba(255, 255, 255, .85);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .55);
+  color: #78739f;
+  cursor: pointer;
+  transition:
+    transform 250ms var(--ease-out),
+    background 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.farm-tool span {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.farm-tool small {
+  font-size: 11px;
+}
+
+.farm-tool:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+}
+
+.farm-tool:active {
+  transform: scale(.95);
+}
+
+.farm-tool.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #a49ad8, #8daedc);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(131, 132, 195, .24);
+}
+
+.farm-tools-gap {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: rgba(150, 145, 183, .25);
+}
+
+/* ----- day / dusk / night ----- */
+
+.farm-sun {
+  transition: opacity 1.4s ease, transform 1.4s var(--ease-out), background 1.4s ease;
+}
+
+.farm-field[data-phase="dusk"] .farm-sun {
+  transform: translateY(46px);
+  background: radial-gradient(circle at 40% 35%, #fff1e6, #ffc79a);
+  box-shadow: 0 0 40px rgba(255, 190, 150, .85);
+}
+
+.farm-field[data-phase="night"] .farm-sun {
+  opacity: 0;
+  transform: translateY(70px);
+}
+
+/* Warm or dark wash over the scenery (animals are dimmed separately) */
+.farm-tint {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background-color: #ffffff;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transition: background-color 1.4s ease;
+}
+
+.farm-field[data-phase="dusk"] .farm-tint {
+  background-color: #ffcfb4;
+}
+
+.farm-field[data-phase="night"] .farm-tint {
+  background-color: #6a70b4;
+}
+
+.animal {
+  transition:
+    left 3.6s cubic-bezier(.45, .05, .55, .95),
+    top 3.6s cubic-bezier(.45, .05, .55, .95),
+    filter 1.4s ease;
+}
+
+.farm-field[data-phase="dusk"] .animal {
+  filter: sepia(.14) brightness(.95);
+}
+
+.farm-field[data-phase="night"] .animal {
+  filter: brightness(.8) saturate(.88);
+}
+
+.farm-moon {
+  position: absolute;
+  z-index: 4;
+  top: 8%;
+  left: 12%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffef2, #f4efc8 70%);
+  box-shadow: 0 0 34px rgba(255, 250, 210, .7);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.4s ease, transform 1.4s var(--ease-out);
+  pointer-events: none;
+}
+
+.farm-moon::after {
+  content: "";
+  position: absolute;
+  top: 34%;
+  left: 52%;
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  background: rgba(210, 200, 160, .35);
+}
+
+.farm-field[data-phase="night"] .farm-moon {
+  opacity: 1;
+  transform: none;
+}
+
+.farm-stars {
+  position: absolute;
+  z-index: 4;
+  inset: 0 0 48% 0;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  pointer-events: none;
+}
+
+.farm-stars::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 8% 22%, #fff 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 22% 10%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 34% 30%, #fff 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 47% 14%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 58% 34%, #fff 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 70% 8%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 83% 26%, #fff 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 92% 12%, #fff 0 1px, transparent 2px);
+  animation: star-twinkle 3.4s ease-in-out infinite;
+}
+
+.farm-field[data-phase="night"] .farm-stars {
+  opacity: 1;
+}
+
+/* Fireflies only exist at night */
+.firefly {
+  position: absolute;
+  z-index: 1500;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff9b8;
+  box-shadow: 0 0 8px 3px rgba(255, 245, 160, .8);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.farm-field[data-phase="night"] .firefly {
+  visibility: visible;
+  animation:
+    firefly-float 7s ease-in-out var(--d, 0s) infinite,
+    firefly-glow 2.6s ease-in-out var(--d, 0s) infinite;
+}
+
+/* Sleepy animals at night */
+.animal-zzz {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 58%;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-shadow: 0 1px 4px rgba(60, 60, 120, .35);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.farm-field[data-phase="night"] .animal-zzz {
+  animation: zzz-rise 3.2s ease-in-out infinite;
+}
+
+.farm-field[data-phase="night"] .farm-eyes {
+  animation: none;
+  transform: scaleY(.12);
+}
