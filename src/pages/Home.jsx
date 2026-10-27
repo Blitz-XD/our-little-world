@@ -1,4 +1,5 @@
 import { Counter, MadeWith } from "../components/Extras";
+
 export default function Home({ setPage }) {
   return (
     <main className="home-page">
@@ -14,11 +15,7 @@ export default function Home({ setPage }) {
           <p className="princess">my princess<span> ♡</span></p>
         </div>
 
-        <div className="subtitle">
-          <span className="subtitle-line" />
-          <p><Counter /></p>
-          <span className="subtitle-line" />
-        </div>
+        <Counter />
 
         <button
           className="enter-button"
@@ -28,9 +25,7 @@ export default function Home({ setPage }) {
           <span className="enter-arrow">↗</span>
         </button>
 
-        <p className="hero-footnote">
-            <MadeWith />
-        </p>
+        <MadeWith />
       </section>
 
       <div className="bottom-decoration" aria-hidden="true">
